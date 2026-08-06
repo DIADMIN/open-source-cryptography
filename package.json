@@ -16,6 +16,10 @@
     "xmldsig-signer",
     "section-65b-certificate",
     "dsc-token-bridge",
-    "pdf-redaction-engine"
+    "pdf-redaction-engine",
+    "cms-signature-validator",
+    "pdf-vector-sanitizer",
+    "usb-token-policy-guard",
+    "trust-anchor-resolver"
   ]
 }

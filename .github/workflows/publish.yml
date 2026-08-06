@@ -26,6 +26,10 @@ jobs:
           - section-65b-certificate
           - dsc-token-bridge
           - pdf-redaction-engine
+          - cms-signature-validator
+          - pdf-vector-sanitizer
+          - usb-token-policy-guard
+          - trust-anchor-resolver
 
     steps:
       - name: Checkout repository

@@ -178,30 +178,28 @@ export async function signPdf(pdfBytes, options = {}) {
 
   const docHash = await getSHA256Hash(signedBuffer);
 
-  // Compute signature bytes using Web Crypto
-  let signatureBytes = new Uint8Array(256); // Fallback dummy signature
-  if (privateKey) {
-    const crypto = typeof window !== 'undefined' ? window.crypto : (await import('crypto')).webcrypto;
-    const signatureBuffer = await crypto.subtle.sign(
-      { name: 'RSASSA-PKCS1-v1_5' },
-      privateKey,
-      docHash
-    );
-    signatureBytes = new Uint8Array(signatureBuffer);
-  }
-
   // Build true CMS SignedData structure
   let cmsBytes;
   if (signerCertificateDer && signerIssuerNameDer && signerSerialNumberHex) {
-    cmsBytes = buildCMSSignedData({
+    cmsBytes = await buildCMSSignedData({
       documentHash: docHash,
       signerCertificateDer,
-      signatureBytes,
+      privateKey,
       signerIssuerNameDer,
       signerSerialNumberHex
     });
   } else {
     // If no real certificates are provided, format a generic signature payload
+    let signatureBytes = new Uint8Array(256);
+    if (privateKey) {
+      const crypto = typeof window !== 'undefined' ? window.crypto : (await import('crypto')).webcrypto;
+      const signatureBuffer = await crypto.subtle.sign(
+        { name: 'RSASSA-PKCS1-v1_5' },
+        privateKey,
+        docHash
+      );
+      signatureBytes = new Uint8Array(signatureBuffer);
+    }
     cmsBytes = signatureBytes;
   }
 
