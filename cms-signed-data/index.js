@@ -19,13 +19,14 @@ import {
  * RFC 5652 / ETSI EN 319 132 compliant detached layout.
  * 
  * @param {Object} options - Configuration parameters
- * @returns {Uint8Array} DER encoded CMS SignedData bytes
+ * @returns {Promise<Uint8Array>} DER encoded CMS SignedData bytes
  */
-export function buildCMSSignedData(options) {
+export async function buildCMSSignedData(options) {
   const {
     documentHash, // Uint8Array of PDF SHA-256 digest
     signerCertificateDer, // Uint8Array of signer X.509 cert DER
-    signatureBytes, // Uint8Array of cryptographic signature
+    signatureBytes: inputSignatureBytes, // Optional fallback signature
+    privateKey, // Cryptographic private key for signing signedAttributes
     signerIssuerNameDer, // Uint8Array of serialized DistinguishedName of cert issuer
     signerSerialNumberHex // Hex string serial number of cert
   } = options;
@@ -51,7 +52,6 @@ export function buildCMSSignedData(options) {
   ]);
 
   // 4. Certificates: [0] IMPLICIT CertificateSet (SET of Certificate DERs)
-  // IMPLICIT context tag 0 is 0xA0
   const certificates = derTLV(0xA0, signerCertificateDer);
 
   // 5. SignerInfo: SEQUENCE
@@ -60,8 +60,6 @@ export function buildCMSSignedData(options) {
   // SignerIdentifier: IssuerAndSerialNumber
   // Sequence of Issuer (Name) and SerialNumber (Integer)
   const signerIdentifier = derSequence([
-    // Since signerIssuerNameDer is already a serialized DistinguishedName SEQUENCE,
-    // we can parse/inject its raw bytes directly.
     signerIssuerNameDer,
     derInteger(signerSerialNumberHex)
   ]);
@@ -71,9 +69,10 @@ export function buildCMSSignedData(options) {
     derNull()
   ]);
 
-  // Optional: SignedAttributes [0] IMPLICIT SignedAttributes (highly recommended for PAdES)
-  // Let's build basic signed attributes: ContentType OID, MessageDigest OID, SigningTime OID.
-  // Tag 0xA0 (constructed context tag 0) represents the SignedAttributes SET
+  // SignedAttributes: SET of Attribute
+  // In PKCS#7/CMS, if signedAttributes are present, we MUST include:
+  // - ContentType: OID of encapsulated content type (data OID)
+  // - MessageDigest: SHA-256 hash of the encapsulated content (document hash)
   const contentTypeAttr = derSequence([
     derOID('1.2.840.113549.1.9.3'), // contentType OID
     derSet([derOID(dataOid)])
@@ -84,17 +83,35 @@ export function buildCMSSignedData(options) {
     derSet([derOctetString(documentHash)])
   ]);
 
+  // The collection of attributes wrapped in the context-specific tag [0] (0xA0) for SignerInfo
   const signedAttrsSet = derTLV(0xA0, concatUint8Arrays([
     contentTypeAttr,
     messageDigestAttr
   ]));
+
+  // Standard-compliant signature calculation requires signing the SET representation (tag 0x31)
+  let finalSignatureBytes = inputSignatureBytes || new Uint8Array(256);
+  if (privateKey) {
+    const crypto = typeof window !== 'undefined' ? window.crypto : (await import('crypto')).webcrypto;
+    const signedAttrsData = derTLV(0x31, concatUint8Arrays([
+      contentTypeAttr,
+      messageDigestAttr
+    ]));
+    
+    const signatureBuffer = await crypto.subtle.sign(
+      { name: 'RSASSA-PKCS1-v1_5' },
+      privateKey,
+      signedAttrsData
+    );
+    finalSignatureBytes = new Uint8Array(signatureBuffer);
+  }
 
   const signatureAlgorithm = derSequence([
     derOID(rsaSha256Oid),
     derNull()
   ]);
 
-  const signature = derOctetString(signatureBytes);
+  const signature = derOctetString(finalSignatureBytes);
 
   const signerInfo = derSequence([
     signerInfoVersion,
@@ -117,8 +134,6 @@ export function buildCMSSignedData(options) {
   ]);
 
   // 7. Outer ContentInfo SEQUENCE
-  // contentType: OID 1.2.840.113549.1.7.2 (signedData)
-  // content: [0] EXPLICIT SignedData
   const contentInfo = derSequence([
     derOID('1.2.840.113549.1.7.2'),
     derTLV(0xA0, signedData)
