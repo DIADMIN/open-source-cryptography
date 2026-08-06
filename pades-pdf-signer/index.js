@@ -1,6 +1,6 @@
 /**
  * @dottedice/pades-pdf-signer
- * PAdES-compliant cryptographic PDF signer using incremental updates and client-side Web Crypto.
+ * Client-side cryptographic PDF signer using metadata-level updates and Web Crypto.
  */
 
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
@@ -15,7 +15,7 @@ async function getSHA256Hash(buffer) {
 }
 
 /**
- * Signs a PDF byte array using client-side Web Crypto parameters.
+ * Signs a PDF byte array using client-side Web Crypto parameters by writing metadata-level signatures.
  * @param {Uint8Array} pdfBytes - Original PDF bytes
  * @param {Object} options - Configuration options
  * @returns {Promise<Uint8Array>} Signed PDF bytes
@@ -26,7 +26,8 @@ export async function signPdf(pdfBytes, options = {}) {
     location = 'Remote Desktop Client',
     contactInfo = 'esign@dottedice.com',
     privateKey = null, // Web Crypto private key
-    visualStamp = null // Optional coordinate object { x, y, width, height }
+    visualStamp = null, // Optional coordinate object { x, y, width, height }
+    trustAuthority = 'Self-Signed / Unverified CA'
   } = options;
 
   const pdfDoc = await PDFDocument.load(pdfBytes);
@@ -74,6 +75,10 @@ export async function signPdf(pdfBytes, options = {}) {
     color: rgb(0.2, 0.2, 0.2),
   });
 
+  // Prepare metadata placeholders for deterministic hashing
+  pdfDoc.setSubject('DOTTEDICE-METADATA-SIGNATURE-PLACEHOLDER');
+  pdfDoc.setProducer('DOTTEDICE-PRODUCER-PLACEHOLDER');
+
   // Calculate pre-sign hash of PDF Document bytes
   const midPdfBytes = await pdfDoc.save();
   const docHash = await getSHA256Hash(midPdfBytes);
@@ -101,11 +106,12 @@ export async function signPdf(pdfBytes, options = {}) {
     signatureBlock: encryptedSignature || 'SIMULATED-LOCAL-CRYPTOGRAPHIC-BLOCK',
     sha256Hash: hashHex,
     signer: signatoryName,
-    timestamp: timestamp
+    timestamp: timestamp,
+    trustAuthority: trustAuthority
   };
 
   // Embed signature envelope data in metadata directory
-  pdfDoc.setProducer(`DottedIce eSign Engine (PAdES-LTV v2.4.0)`);
+  pdfDoc.setProducer(`DottedIce eSign Engine (SHA-256 Metadata Stamp v1.0.2)`);
   pdfDoc.setSubject(JSON.stringify(signatureMetadata));
 
   return await pdfDoc.save();

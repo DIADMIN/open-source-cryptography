@@ -68,10 +68,10 @@ export async function exportPEM(key, format) {
 }
 
 /**
- * Simulates creation of an X.509 self-signed certificate structure offline.
+ * Simulates creation of a self-signed certificate payload offline (JSON structured format, non-ASN.1 DER).
  * @param {Object} subject - Certificate metadata (e.g. { commonName: 'Vikram', org: 'DottedIce' })
  * @param {CryptoKeyPair} keyPair - Cryptographic keys
- * @returns {Promise<Object>} Certificate payload
+ * @returns {Promise<Object>} Certificate payload and signature details
  */
 export async function generateX509Certificate(subject, keyPair) {
   const crypto = typeof window !== 'undefined' ? window.crypto : (await import('crypto')).webcrypto;
@@ -80,13 +80,18 @@ export async function generateX509Certificate(subject, keyPair) {
   
   const publicPem = await exportPEM(keyPair.publicKey, 'public');
   
+  // Generate a cryptographically secure random serial number
+  const randomBytes = new Uint8Array(8);
+  crypto.getRandomValues(randomBytes);
+  const serialNumber = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+
   // Create a payload to sign
   const certData = JSON.stringify({
     subject: { commonName, org },
     validFrom: new Date().toISOString(),
     validTo: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
     publicKeyPem: publicPem,
-    serialNumber: Math.floor(Math.random() * 1000000000).toString(16)
+    serialNumber: serialNumber
   });
   
   const encoder = new TextEncoder();

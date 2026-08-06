@@ -1,6 +1,6 @@
 # @dottedice/pades-pdf-signer
 
-PAdES-compliant PDF signing utility using incremental update pipelines and native client-side Web Crypto.
+Client-side cryptographic PDF signing utility using metadata-level updates and native Web Crypto.
 
 ## Installation
 
@@ -9,7 +9,7 @@ npm install @dottedice/pades-pdf-signer pdf-lib
 ```
 
 ## Features
-* **PAdES Compatibility**: Automatically sets document metadata structures compatible with PAdES dictionary checks.
+* **Metadata-Level Signing**: Stores cryptographic signatures, digests, and signer information securely in the PDF document metadata fields (Producer and Subject).
 * **Web Crypto Integration**: Performs local document pre-hashing and asymmetric signature computation fully offline inside the browser.
 * **Visual Stamp Drawer**: Supports placing styled signature stamps on coordinates with custom signatory metadata.
 
@@ -30,16 +30,19 @@ const signedPdfBytes = await signPdf(new Uint8Array(originalPdfBytes), {
   signatoryName: 'Vikramaditya Sharma',
   location: 'Chennai Sandbox Platform',
   privateKey: keyPair.privateKey,
+  trustAuthority: 'Local Authority CA',
   visualStamp: { x: 50, y: 120, width: 260, height: 75 }
 });
 
 // signedPdfBytes is a signed PDF document, ready for download or verification
 ```
 
+> [!NOTE]
+> This package writes signatures directly to the PDF Document metadata directory (Subject/Producer structures). Standard PDF readers (like Adobe Acrobat) will not display an AcroForm signature badge. For native PDF byte-range signatures (true ETSI PAdES compliance), use our upcoming `@dottedice/cms-signed-data` package.
+
 ## Publishing to Registry
 
 To publish this package to the npm registry, execute:
 ```bash
 npm login
-npm publish --access public
 ```

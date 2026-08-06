@@ -1,6 +1,6 @@
 # @dottedice/web-crypto-pki
 
-Offline-first asymmetric key pair and X.509 certificate generator utilizing the native Web Cryptography API. Works seamlessly in both modern web browsers and Node.js environments.
+Offline-first asymmetric key pair and simulated certificate generator utilizing the native Web Cryptography API. Works seamlessly in both modern web browsers and Node.js environments.
 
 ## Installation
 
@@ -12,7 +12,7 @@ npm install @dottedice/web-crypto-pki
 * **Zero Dependencies**: Uses standard native Web Cryptography APIs under the hood.
 * **Algorithm Support**: Supports standard RSA (`RSASSA-PKCS1-v1_5`) and ECDSA (`P-256`) algorithms.
 * **PEM Exports**: Convenient utilities to format cryptographic keys as PEM (`SPKI` / `PKCS#8`) strings.
-* **Offline X.509 Certification**: Locally simulates self-signed certificate structures for testing and sandbox validation.
+* **Simulated Self-Signed Certificates**: Locally generates JSON-structured self-signed certificate payloads for development sandboxes and testing (non-ASN.1 DER format).
 
 ## Usage Example
 
@@ -26,7 +26,7 @@ const keyPair = await generateKeyPair('RSA');
 const privatePem = await exportPEM(keyPair.privateKey, 'private');
 console.log(privatePem);
 
-// 3. Generate a local self-signed certificate
+// 3. Generate a local simulated self-signed certificate payload
 const cert = await generateX509Certificate(
   { commonName: 'Vikram Sharma', organization: 'DottedIce Tech' },
   keyPair
@@ -34,10 +34,12 @@ const cert = await generateX509Certificate(
 console.log('Certificate Signature:', cert.signature);
 ```
 
+> [!NOTE]
+> `generateX509Certificate` generates a simulated JSON-structured representation of certificate metadata signed with Web Crypto. For standard ASN.1 DER certificates compliant with RFC 5280, use our upcoming `@dottedice/x509-asn1-builder` package.
+
 ## Publishing to Registry
 
 To publish this package to the npm registry, execute:
 ```bash
 npm login
-npm publish --access public
 ```
