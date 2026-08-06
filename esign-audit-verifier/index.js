@@ -17,9 +17,10 @@ async function getSHA256Hash(buffer) {
 /**
  * Verifies the signature integrity of a PDF file buffer.
  * @param {Uint8Array} signedPdfBytes - Bytes of the signed PDF file
+ * @param {Object} options - Verification options (e.g. { trustAuthority })
  * @returns {Promise<Object>} Verification and Audit Trail results
  */
-export async function verifySignature(signedPdfBytes) {
+export async function verifySignature(signedPdfBytes, options = {}) {
   try {
     const pdfDoc = await PDFDocument.load(signedPdfBytes);
     
@@ -45,17 +46,25 @@ export async function verifySignature(signedPdfBytes) {
       };
     }
 
-    // Recompute file hash
-    const currentHashBytes = await getSHA256Hash(signedPdfBytes);
+    // Recompute file hash by substituting placeholders first for deterministic comparison
+    const cleanPdfDoc = await PDFDocument.load(signedPdfBytes);
+    cleanPdfDoc.setSubject('DOTTEDICE-METADATA-SIGNATURE-PLACEHOLDER');
+    cleanPdfDoc.setProducer('DOTTEDICE-PRODUCER-PLACEHOLDER');
+    const cleanPdfBytes = await cleanPdfDoc.save();
+
+    const currentHashBytes = await getSHA256Hash(cleanPdfBytes);
     const currentHashHex = Array.from(currentHashBytes).map(b => b.toString(16).padStart(2, '0')).join('');
 
-    // Check matches
-    const hashMatches = meta.sha256Hash ? (currentHashHex.substring(0, 32) === meta.sha256Hash.substring(0, 32)) : true;
+    // Check matches (fully compare the 64 hex characters)
+    const hashMatches = meta.sha256Hash ? (currentHashHex === meta.sha256Hash) : true;
+
+    // Determine trust authority dynamically
+    const trustAuthority = options.trustAuthority || meta.trustAuthority || 'Self-Signed / Unverified CA';
 
     // Generate Sec 65B compliant Audit Trail Certificate payload
     const auditCertificate = {
       admissibilityReference: `SEC-65B-CERT-${Math.floor(Math.random() * 10000000).toString(16).toUpperCase()}`,
-      complianceFramework: 'Section 65B Indian Evidence Act 1872 / BSA 2023 Compliant',
+      complianceFramework: 'Section 65B Indian Evidence Act 1872 / BSA 2023 Audit Reference Log (Requires human attestation for court admissibility)',
       systemMetadata: {
         hashAlgorithm: 'SHA-256',
         computedFileHash: currentHashHex,
@@ -66,9 +75,9 @@ export async function verifySignature(signedPdfBytes) {
         signerIdentity: meta.signer || 'Unknown Signatory',
         timestamp: meta.timestamp || new Date().toISOString(),
         validationTimestamp: new Date().toISOString(),
-        trustAuthority: 'eMudhra CA / UIDAI eSign Approved CA'
+        trustAuthority: trustAuthority
       },
-      courtAttestationText: 'This document certifies that the electronic record hash has been validated locally on secure sandboxed device hardware and satisfies legal electronic verification standards.'
+      courtAttestationText: 'This document represents an electronic record audit trail log. To be admissible under Section 65B of the Indian Evidence Act / BSA 2023, it must be accompanied by a signed declaration from the person in charge of the computer system.'
     };
 
     return {
