@@ -1,0 +1,21 @@
+{
+  "name": "open-source-cryptography-monorepo",
+  "private": true,
+  "scripts": {
+    "test": "node test.js"
+  },
+  "workspaces": [
+    "web-crypto-pki",
+    "pades-pdf-signer",
+    "esign-audit-verifier",
+    "x509-asn1-builder",
+    "cms-signed-data",
+    "timestamp-authority-client",
+    "secure-key-store",
+    "aadhaar-esign-bridge",
+    "xmldsig-signer",
+    "section-65b-certificate",
+    "dsc-token-bridge",
+    "pdf-redaction-engine"
+  ]
+}

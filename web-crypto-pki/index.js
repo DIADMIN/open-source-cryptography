@@ -1,7 +1,4 @@
-/**
- * @dottedice/web-crypto-pki
- * Offline-first key pair and self-signed certificate utilities using Web Cryptography API.
- */
+import { buildTBSCertificate, buildX509Certificate } from '@dottedice/x509-asn1-builder';
 
 /**
  * Generates an asymmetric key pair.
@@ -68,55 +65,61 @@ export async function exportPEM(key, format) {
 }
 
 /**
- * Simulates creation of a self-signed certificate payload offline (JSON structured format, non-ASN.1 DER).
- * @param {Object} subject - Certificate metadata (e.g. { commonName: 'Vikram', org: 'DottedIce' })
+ * Generates an RFC 5280 compliant X.509 self-signed certificate.
+ * @param {Object} subject - Certificate metadata (e.g. { commonName: 'Vikram', organization: 'DottedIce' })
  * @param {CryptoKeyPair} keyPair - Cryptographic keys
- * @returns {Promise<Object>} Certificate payload and signature details
+ * @returns {Promise<Object>} Certificate PEM, DER bytes, and details
  */
 export async function generateX509Certificate(subject, keyPair) {
   const crypto = typeof window !== 'undefined' ? window.crypto : (await import('crypto')).webcrypto;
-  const commonName = subject.commonName || 'Anonymous';
-  const org = subject.organization || 'Local Sandbox Org';
   
-  const publicPem = await exportPEM(keyPair.publicKey, 'public');
+  // 1. Export the public key to SPKI DER format
+  const publicKeySpkiBytes = new Uint8Array(await crypto.subtle.exportKey('spki', keyPair.publicKey));
   
-  // Generate a cryptographically secure random serial number
+  // 2. Generate a secure random serial number
   const randomBytes = new Uint8Array(8);
   crypto.getRandomValues(randomBytes);
-  const serialNumber = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  const serialNumberHex = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
 
-  // Create a payload to sign
-  const certData = JSON.stringify({
-    subject: { commonName, org },
-    validFrom: new Date().toISOString(),
-    validTo: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-    publicKeyPem: publicPem,
-    serialNumber: serialNumber
+  const rsaSha256Oid = '1.2.840.113549.1.1.11'; // sha256WithRSAEncryption
+
+  // 3. Build TBS Certificate (To Be Signed)
+  const tbsDer = buildTBSCertificate({
+    serialNumber: serialNumberHex,
+    signatureOid: rsaSha256Oid,
+    issuerAttributes: subject,
+    subjectAttributes: subject,
+    publicKeySpkiBytes
   });
-  
-  const encoder = new TextEncoder();
-  const certBytes = encoder.encode(certData);
-  
-  // Self-sign the certificate payload using the private key
+
+  // 4. Sign the TBS Certificate
   const signatureBuffer = await crypto.subtle.sign(
-    {
-      name: 'RSASSA-PKCS1-v1_5'
-    },
+    { name: 'RSASSA-PKCS1-v1_5' },
     keyPair.privateKey,
-    certBytes
+    tbsDer
   );
-  
   const signatureBytes = new Uint8Array(signatureBuffer);
-  let binarySig = '';
-  for (let i = 0; i < signatureBytes.byteLength; i++) {
-    binarySig += String.fromCharCode(signatureBytes[i]);
+
+  // 5. Build Final DER X.509 Certificate
+  const certDer = buildX509Certificate(tbsDer, rsaSha256Oid, signatureBytes);
+
+  // 6. Convert to standard PEM representation
+  let binary = '';
+  for (let i = 0; i < certDer.byteLength; i++) {
+    binary += String.fromCharCode(certDer[i]);
   }
-  const signatureBase64 = typeof btoa !== 'undefined' ? btoa(binarySig) : Buffer.from(binarySig, 'binary').toString('base64');
+  const base64 = typeof btoa !== 'undefined' ? btoa(binary) : Buffer.from(binary, 'binary').toString('base64');
   
+  const lines = [];
+  for (let i = 0; i < base64.length; i += 64) {
+    lines.push(base64.slice(i, i + 64));
+  }
+  const pem = `-----BEGIN CERTIFICATE-----\n${lines.join('\n')}\n-----END CERTIFICATE-----`;
+
   return {
-    rawPayload: certData,
-    signature: signatureBase64,
-    algorithm: 'RSASSA-PKCS1-v1_5-SHA256',
-    issuer: { commonName, org }
+    pem,
+    der: certDer,
+    serialNumber: serialNumberHex,
+    issuer: subject
   };
 }

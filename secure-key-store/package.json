@@ -1,0 +1,19 @@
+{
+  "name": "@dottedice/secure-key-store",
+  "version": "1.0.0",
+  "description": "Secure IndexedDB key storage with client-side Web Crypto PBKDF2/AES-GCM encryption",
+  "main": "index.js",
+  "type": "module",
+  "keywords": [
+    "secure-storage",
+    "indexeddb",
+    "webcrypto",
+    "key-store",
+    "private-key"
+  ],
+  "author": "DottedIce Digital",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}

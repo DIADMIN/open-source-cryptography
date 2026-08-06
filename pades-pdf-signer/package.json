@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "dependencies": {
-    "pdf-lib": "^1.17.1"
+    "pdf-lib": "^1.17.1",
+    "@dottedice/cms-signed-data": "^1.0.0"
   },
   "keywords": [
     "pdf-signer",
