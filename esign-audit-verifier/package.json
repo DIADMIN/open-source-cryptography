@@ -1,0 +1,22 @@
+{
+  "name": "@dottedice/esign-audit-verifier",
+  "version": "1.0.0",
+  "description": "Offline PDF cryptographic signature validation and Section 65B Indian Evidence Act compliant audit log compiler",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  },
+  "keywords": [
+    "signature-verification",
+    "pades-verification",
+    "pdf-integrity",
+    "indian-evidence-act",
+    "audit-trail"
+  ],
+  "author": "DottedIce Digital",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

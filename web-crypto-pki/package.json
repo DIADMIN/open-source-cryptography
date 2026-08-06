@@ -1,0 +1,24 @@
+{
+  "name": "@dottedice/web-crypto-pki",
+  "version": "1.0.0",
+  "description": "Offline-first keypair and X.509 certificate generator using Web Crypto API",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "keywords": [
+    "cryptography",
+    "webcrypto",
+    "pki",
+    "x509",
+    "offline-first",
+    "keypair",
+    "certificates"
+  ],
+  "author": "DottedIce Digital",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

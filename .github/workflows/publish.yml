@@ -1,0 +1,55 @@
+name: Publish Packages to NPM
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Build & Publish @dottedice packages
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        package:
+          - web-crypto-pki
+          - pades-pdf-signer
+          - esign-audit-verifier
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.package }}
+        run: npm install --ignore-scripts
+
+      - name: Check if version is already published
+        id: version_check
+        working-directory: ${{ matrix.package }}
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "Checking $PACKAGE_NAME@$PACKAGE_VERSION on NPM..."
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
+            echo "already_published=true" >> "$GITHUB_OUTPUT"
+            echo "⏭️  $PACKAGE_NAME@$PACKAGE_VERSION already exists — skipping."
+          else
+            echo "already_published=false" >> "$GITHUB_OUTPUT"
+            echo "✅  $PACKAGE_NAME@$PACKAGE_VERSION not found — will publish."
+          fi
+
+      - name: Publish to NPM
+        if: steps.version_check.outputs.already_published == 'false'
+        working-directory: ${{ matrix.package }}
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
