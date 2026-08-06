@@ -4,6 +4,9 @@
   "description": "Offline-first keypair and X.509 certificate generator using Web Crypto API",
   "main": "index.js",
   "type": "module",
+  "dependencies": {
+    "@dottedice/x509-asn1-builder": "^1.0.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 0"
   },

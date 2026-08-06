@@ -1,0 +1,22 @@
+{
+  "name": "@dottedice/pdf-redaction-engine",
+  "version": "1.0.0",
+  "description": "Client-side PDF data redaction and secure verification prior to signing",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  },
+  "keywords": [
+    "pdf-redaction",
+    "privacy",
+    "pdf-lib",
+    "dpdp",
+    "esign"
+  ],
+  "author": "DottedIce Digital",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}

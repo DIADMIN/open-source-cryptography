@@ -1,0 +1,19 @@
+{
+  "name": "@dottedice/xmldsig-signer",
+  "version": "1.0.0",
+  "description": "Lightweight W3C XML Digital Signature (XMLDSig) payload builder for secure XML signing",
+  "main": "index.js",
+  "type": "module",
+  "keywords": [
+    "xmldsig",
+    "xml-signature",
+    "w3c",
+    "cryptography",
+    "gst-invoicing"
+  ],
+  "author": "DottedIce Digital",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}
