@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DottedIce Compliance Portal & Monorepo Audit</title>
+  <meta name="description" content="Detailed regulatory compliance, security audit, and package directory for the DottedIce open-source cryptographic monorepo.">
+  
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Styling System & Variables */
+    :root {
+      --bg-base: #060813;
+      --bg-surface: rgba(15, 20, 42, 0.6);
+      --bg-surface-hover: rgba(26, 33, 64, 0.8);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-color-active: rgba(139, 92, 246, 0.4);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-purple: #8b5cf6;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-red: #ef4444;
+      --glow-purple: rgba(139, 92, 246, 0.15);
+      --font-outfit: 'Outfit', sans-serif;
+      --font-inter: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-inter);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Abstract background blobs */
+    .bg-glow-1 {
+      position: absolute;
+      top: -10%;
+      left: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-glow-2 {
+      position: absolute;
+      bottom: -10%;
+      right: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, rgba(59, 82, 246, 0.08) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Header Container */
+    header {
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 2rem 2rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-container h1 {
+      font-family: var(--font-outfit);
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-container p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+
+    .badge-shield {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      color: var(--accent-emerald);
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+    }
+
+    .badge-shield::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-emerald);
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      max-width: 1200px;
+      margin: 1.5rem auto;
+      padding: 0 2rem;
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-color);
+      position: relative;
+      z-index: 10;
+    }
+
+    .tab-button {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-family: var(--font-outfit);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 2px solid transparent;
+      outline: none;
+    }
+
+    .tab-button:hover {
+      color: var(--text-primary);
+    }
+
+    .tab-button.active {
+      color: var(--accent-purple);
+      border-bottom-color: var(--accent-purple);
+      text-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+    }
+
+    /* Main Content Container */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Dashboard Overview Tab Styling */
+    .overview-hero {
+      background: linear-gradient(135deg, rgba(20, 24, 48, 0.6) 0%, rgba(10, 12, 26, 0.6) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .overview-hero h2 {
+      font-family: var(--font-outfit);
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    .overview-hero p {
+      color: var(--text-secondary);
+      max-width: 800px;
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-color-active);
+      background: rgba(139, 92, 246, 0.02);
+    }
+
+    .stat-num {
+      font-family: var(--font-outfit);
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--accent-purple);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Package Grid Directory Styling */
+    .package-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 24px;
+    }
+
+    .package-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .package-card:hover {
+      transform: translateY(-4px);
+      background-color: var(--bg-surface-hover);
+      border-color: var(--border-color-active);
+      box-shadow: 0 12px 24px rgba(139, 92, 246, 0.08);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .package-title {
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      color: var(--text-primary);
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .package-version {
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      color: var(--accent-purple);
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .package-description {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      flex-grow: 1;
+    }
+
+    .tag-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: auto;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .tag.sec-tag {
+      background: rgba(59, 130, 246, 0.08);
+      color: #93c5fd;
+      border-color: rgba(59, 130, 246, 0.2);
+    }
+
+    .tag.comp-tag {
+      background: rgba(16, 185, 129, 0.08);
+      color: #6ee7b7;
+      border-color: rgba(16, 185, 129, 0.2);
+    }
+
+    /* Regulatory Checklist Styling */
+    .compliance-container {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 30px;
+    }
+
+    .compliance-summary-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2.5rem;
+      height: fit-content;
+    }
+
+    .compliance-summary-card h3 {
+      font-family: var(--font-outfit);
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .compliance-summary-card p {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+
+    .checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .checklist-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      transition: all 0.3s ease;
+    }
+
+    .checklist-item:hover {
+      border-color: var(--border-color-active);
+      background: var(--bg-surface-hover);
+    }
+
+    .icon-wrapper {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(139, 92, 246, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--accent-purple);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+
+    .checklist-text h4 {
+      font-family: var(--font-outfit);
+      font-size: 1.15rem;
+      margin-bottom: 4px;
+    }
+
+    .checklist-text p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+    }
+
+    .checklist-packages {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .checklist-packages span {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    /* Architecture Visual Flow Tab */
+    .arch-flow-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+    }
+
+    .arch-title {
+      font-family: var(--font-outfit);
+      font-size: 1.6rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .arch-subtitle {
+      color: var(--text-secondary);
+      margin-bottom: 3rem;
+    }
+
+    .flow-steps {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .flow-steps::after {
+      content: '';
+      position: absolute;
+      top: 24px;
+      left: 10%;
+      width: 80%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-purple) 0%, var(--accent-blue) 100%);
+      z-index: 1;
+    }
+
+    .flow-step {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 22%;
+      text-align: center;
+    }
+
+    .step-circle {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--bg-base);
+      border: 3px solid var(--accent-purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-family: var(--font-outfit);
+      margin-bottom: 1rem;
+      box-shadow: 0 0 15px var(--glow-purple);
+    }
+
+    .flow-step:nth-child(2) .step-circle { border-color: var(--accent-blue); box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+    .flow-step:nth-child(3) .step-circle { border-color: var(--accent-emerald); box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
+    .flow-step:nth-child(4) .step-circle { border-color: var(--accent-purple); }
+
+    .step-name {
+      font-family: var(--font-outfit);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .step-desc {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    /* Footer Styling */
+    footer {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+      font-size: 0.9rem;
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-container">
+      <h1>DottedIce Cryptography</h1>
+      <p>16 Modules Formulating a Secure Digital Signing Workspace</p>
+    </div>
+    <div class="badge-shield">
+      Compliance Shield Active
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <nav class="nav-tabs">
+    <button class="tab-button active" onclick="switchTab('overview')">Monorepo Overview</button>
+    <button class="tab-button" onclick="switchTab('directory')">Package Directory</button>
+    <button class="tab-button" onclick="switchTab('compliance')">Regulatory Frameworks</button>
+    <button class="tab-button" onclick="switchTab('architecture')">Security Architecture</button>
+  </nav>
+
+  <!-- Main Container -->
+  <main>
+    
+    <!-- Tab 1: Monorepo Overview -->
+    <div id="overview" class="tab-content active">
+      <div class="overview-hero">
+        <h2>Open Source Verification Shield</h2>
+        <p>
+          A modular framework bridging high-performance PDF manipulation, hardware key signatures, W3C validation, and regional legal compliance. This repository provides zero-dependency JavaScript modules to power standard-compliant cryptography inside client runtimes.
+        </p>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num">16</div>
+            <div class="stat-label">Active Workspace Packages</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">100%</div>
+            <div class="stat-label">Web Crypto Native</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">5+</div>
+            <div class="stat-label">Regulations Met</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Package Directory -->
+    <div id="directory" class="tab-content">
+      <div class="package-grid">
+        
+        <!-- Package 1 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/web-crypto-pki</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">Exports Web Crypto keys, manages public/private mappings, and builds standard X.509 self-signed certificates.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">RSA / ECDSA</span>
+            <span class="tag comp-tag">RFC 5280</span>
+          </div>
+        </div>
+
+        <!-- Package 2 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/pades-pdf-signer</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">True byte-range PDF digital signature engine that injects standard detached CMS PKCS#7 signature envelopes in-place.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">/ByteRange</span>
+            <span class="tag comp-tag">PAdES Standard</span>
+          </div>
+        </div>
+
+        <!-- Package 3 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/esign-audit-verifier</span>
+            <span class="package-version">v1.0.2</span>
+          </div>
+          <p class="package-description">Parses byte-range signature dictionaries and checks PDF document integrity to attest tamper-proof system logs.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">Integrity Check</span>
+            <span class="tag comp-tag">Evidence Act / BSA</span>
+          </div>
+        </div>
+
+        <!-- Package 4 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/x509-asn1-builder</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">Zero-dependency DER ASN.1 encoder compiling structures (OIDs, integers, sets) for cert generation.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">DER ASN.1</span>
+            <span class="tag comp-tag">RFC 5280</span>
+          </div>
+        </div>
+
+        <!-- Package 5 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/cms-signed-data</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">Assembles PKCS#7 CMS SignedData detached envelopes containing signed attributes and hashes.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">PKCS#7 Detached</span>
+            <span class="tag comp-tag">RFC 5652</span>
+          </div>
+        </div>
+
+        <!-- Package 6 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/cms-signature-validator</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">Cryptographically verifies the signature value inside CMS envelopes using SPKI public keys.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">Signature Verifier</span>
+            <span class="tag comp-tag">CMS validation</span>
+          </div>
+        </div>
+
+        <!-- Package 7 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/pdf-vector-sanitizer</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">Strips target text characters from raw page content streams, blocking data leaks through copy-paste.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">Text Stripper</span>
+            <span class="tag comp-tag">GDPR & DPDP Act</span>
+          </div>
+        </div>
+
+        <!-- Package 8 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/usb-token-policy-guard</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">Inspects and filters CCID APDU transmissions to block proprietary backdoors or PIN-bypass operations.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">APDU Firewall</span>
+            <span class="tag comp-tag">CCID Policies</span>
+          </div>
+        </div>
+
+        <!-- Package 9 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/trust-anchor-resolver</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">Builds certificate chains and resolves trust anchors against root registers (AATL / eIDAS / CCA India).</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">Chain Builder</span>
+            <span class="tag comp-tag">Trust Anchor</span>
+          </div>
+        </div>
+
+        <!-- Package 10 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/timestamp-authority-client</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">RFC 3161 HTTP TSA client queries trusted authorities for cryptographically signed timestamps.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">TSA Client</span>
+            <span class="tag comp-tag">PAdES-B-T</span>
+          </div>
+        </div>
+
+        <!-- Package 11 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/secure-key-store</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">Encrypts browser-stored private keys using PBKDF2 key derivation and AES-GCM local IndexedDB blocks.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">IndexedDB AES</span>
+            <span class="tag comp-tag">OWASP Standard</span>
+          </div>
+        </div>
+
+        <!-- Package 12 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/aadhaar-esign-bridge</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">Compiles SOAP/XML queries for CCA-licensed Indian ESP gateways to trigger remote digital signatures.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">XML/SOAP ESP</span>
+            <span class="tag comp-tag">CCA India eSign</span>
+          </div>
+        </div>
+
+        <!-- Package 13 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/xmldsig-signer</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">Signs XML structures using canonicalization (C14N) and enveloped XML Digital Signature syntaxes.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">C14N XMLDSig</span>
+            <span class="tag comp-tag">W3C Standard</span>
+          </div>
+        </div>
+
+        <!-- Package 14 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/section-65b-certificate</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">Generates admissibility text forms and metadata attesting to computer system log records.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">Attestation Text</span>
+            <span class="tag comp-tag">Section 65B Act</span>
+          </div>
+        </div>
+
+        <!-- Package 15 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/dsc-token-bridge</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">Connects browser applications directly to USB-connected hardware smartcards using WebUSB standards.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">WebUSB APDU</span>
+            <span class="tag comp-tag">CCID Hardware</span>
+          </div>
+        </div>
+
+        <!-- Package 16 -->
+        <div class="package-card">
+          <div class="card-header">
+            <span class="package-title">@dottedice/pdf-redaction-engine</span>
+            <span class="package-version">v1.0.0</span>
+          </div>
+          <p class="package-description">Applies coordinate-based rectangular color masks over target page regions for visual interface blockouts.</p>
+          <div class="tag-container">
+            <span class="tag sec-tag">Visual Masks</span>
+            <span class="tag comp-tag">UI Redaction</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Tab 3: Regulatory Compliance -->
+    <div id="compliance" class="tab-content">
+      <div class="compliance-container">
+        
+        <div class="compliance-summary-card">
+          <h3>Regulatory Map</h3>
+          <p>
+            The packages in this monorepo are designed to conform to specific regional and global legal standards for eSignatures, data privacy, and encryption export regulations.
+          </p>
+          <p>
+            Choose a target framework to see which packages satisfy its requirements.
+          </p>
+        </div>
+
+        <ul class="checklist">
+          <!-- Item 1 -->
+          <li class="checklist-item">
+            <div class="icon-wrapper">🛡️</div>
+            <div class="checklist-text">
+              <h4>Digital Personal Data Protection (DPDP) Act 2023 / GDPR</h4>
+              <p>Requires total removal of PII data. Visual blackouts leak data, whereas our vector sanitizer strips the characters completely from page streams.</p>
+              <div class="checklist-packages">
+                <span>@dottedice/pdf-vector-sanitizer</span>
+                <span>@dottedice/pdf-redaction-engine</span>
+              </div>
+            </div>
+          </li>
+
+          <!-- Item 2 -->
+          <li class="checklist-item">
+            <div class="icon-wrapper">⚖️</div>
+            <div class="checklist-text">
+              <h4>BSA 2023 / Indian Evidence Act Section 65B</h4>
+              <p>Admissibility of electronic records requires audit trails showing document integrity and a declaration from the system admin.</p>
+              <div class="checklist-packages">
+                <span>@dottedice/esign-audit-verifier</span>
+                <span>@dottedice/section-65b-certificate</span>
+              </div>
+            </div>
+          </li>
+
+          <!-- Item 3 -->
+          <li class="checklist-item">
+            <div class="icon-wrapper">🌐</div>
+            <div class="checklist-text">
+              <h4>eIDAS (Regulation EU 910/2014) / PAdES</h4>
+              <p>Standardizes European digital signatures. Detached signatures must map to specific PDF byte ranges and support LTV/TSA hooks.</p>
+              <div class="checklist-packages">
+                <span>@dottedice/pades-pdf-signer</span>
+                <span>@dottedice/cms-signed-data</span>
+                <span>@dottedice/timestamp-authority-client</span>
+                <span>@dottedice/trust-anchor-resolver</span>
+              </div>
+            </div>
+          </li>
+
+          <!-- Item 4 -->
+          <li class="checklist-item">
+            <div class="icon-wrapper">🔒</div>
+            <div class="checklist-text">
+              <h4>US EAR Export Controls (ECCN 5D002)</h4>
+              <p>Our source code is publicly accessible and qualifies for the TSU export exemption (15 CFR 740.13(e)).</p>
+              <div class="checklist-packages">
+                <span>Monorepo codebase</span>
+              </div>
+            </div>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+
+    <!-- Tab 4: Architecture Visual Flow -->
+    <div id="architecture" class="tab-content">
+      <div class="arch-flow-box">
+        <h3 class="arch-title">Document Processing Pipeline</h3>
+        <p class="arch-subtitle">Tracing the lifecycle of a document from raw input to cryptographically verified, compliant output.</p>
+        
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="step-circle">1</div>
+            <span class="step-name">Sanitize</span>
+            <span class="step-desc">@dottedice/pdf-vector-sanitizer removes target text characters from PDF contents stream.</span>
+          </div>
+          <div class="flow-step">
+            <div class="step-circle">2</div>
+            <span class="step-name">Sign</span>
+            <span class="step-desc">@dottedice/pades-pdf-signer allocates Sig dictionary and writes bytes.</span>
+          </div>
+          <div class="flow-step">
+            <div class="step-circle">3</div>
+            <span class="step-name">Validate</span>
+            <span class="step-desc">@dottedice/cms-signature-validator cryptographically verifies signature envelopes.</span>
+          </div>
+          <div class="flow-step">
+            <div class="step-circle">4</div>
+            <span class="step-name">Resolve</span>
+            <span class="step-desc">@dottedice/trust-anchor-resolver verifies cert chains against root anchors.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 DottedIce Digital. All Rights Reserved. Complies with EU eIDAS, Indian IT Act, and GDPR/DPDP regulations.</p>
+  </footer>
+
+  <script>
+    function switchTab(tabId) {
+      // Hide all contents
+      const contents = document.querySelectorAll('.tab-content');
+      contents.forEach(c => c.classList.remove('active'));
+
+      // Remove active class from buttons
+      const buttons = document.querySelectorAll('.tab-button');
+      buttons.forEach(b => b.classList.remove('active'));
+
+      // Show targeted content and activate button
+      document.getElementById(tabId).classList.add('active');
+      
+      // Find matching button
+      const button = Array.from(buttons).find(b => b.getAttribute('onclick').includes(tabId));
+      if (button) button.classList.add('active');
+    }
+  </script>
+</body>
+</html>
