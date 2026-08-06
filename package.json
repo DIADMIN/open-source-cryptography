@@ -20,6 +20,7 @@
     "cms-signature-validator",
     "pdf-vector-sanitizer",
     "usb-token-policy-guard",
-    "trust-anchor-resolver"
+    "trust-anchor-resolver",
+    "trust-shield-sdk"
   ]
 }

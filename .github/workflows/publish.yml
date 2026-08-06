@@ -30,6 +30,7 @@ jobs:
           - pdf-vector-sanitizer
           - usb-token-policy-guard
           - trust-anchor-resolver
+          - trust-shield-sdk
 
     steps:
       - name: Checkout repository

@@ -1,0 +1,37 @@
+{
+  "name": "@dottedice/trust-shield-sdk",
+  "version": "1.0.0",
+  "description": "Unified Developer SDK for DottedIce Cryptographic Trust Shield: sanitization, signing, and verification",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "@dottedice/web-crypto-pki": "^1.0.0",
+    "@dottedice/pades-pdf-signer": "^1.0.0",
+    "@dottedice/esign-audit-verifier": "^1.0.2",
+    "@dottedice/x509-asn1-builder": "^1.0.0",
+    "@dottedice/cms-signed-data": "^1.0.0",
+    "@dottedice/timestamp-authority-client": "^1.0.0",
+    "@dottedice/secure-key-store": "^1.0.0",
+    "@dottedice/aadhaar-esign-bridge": "^1.0.0",
+    "@dottedice/xmldsig-signer": "^1.0.0",
+    "@dottedice/section-65b-certificate": "^1.0.0",
+    "@dottedice/dsc-token-bridge": "^1.0.0",
+    "@dottedice/pdf-redaction-engine": "^1.0.0",
+    "@dottedice/cms-signature-validator": "^1.0.0",
+    "@dottedice/pdf-vector-sanitizer": "^1.0.0",
+    "@dottedice/usb-token-policy-guard": "^1.0.0",
+    "@dottedice/trust-anchor-resolver": "^1.0.0"
+  },
+  "keywords": [
+    "cryptography",
+    "pdf-signing",
+    "webusb-smartcard",
+    "pades",
+    "esignature-sdk"
+  ],
+  "author": "DottedIce Digital",
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  }
+}
