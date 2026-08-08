@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/x509-asn1-builder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Distinguished Encoding Rules (DER) ASN.1 serializer for Web Crypto and X.509 certificates",
   "main": "index.js",
   "type": "module",

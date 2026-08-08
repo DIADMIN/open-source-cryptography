@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/aadhaar-esign-bridge",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Indian Aadhaar eSign ASP/ESP gateway XML payload compiler and signature parser",
   "main": "index.js",
   "type": "module",

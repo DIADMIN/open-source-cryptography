@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/secure-key-store",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Secure IndexedDB key storage with client-side Web Crypto PBKDF2/AES-GCM encryption",
   "main": "index.js",
   "type": "module",
