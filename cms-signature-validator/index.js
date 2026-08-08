@@ -10,6 +10,9 @@ function parseLength(bytes, offset) {
   
   if (len & 0x80) {
     const numBytes = len & 0x7F;
+    if (numBytes > 4) {
+      throw new Error('ASN.1 Length field overflow: length byte count exceeds 4 bytes.');
+    }
     len = 0;
     for (let i = 0; i < numBytes; i++) {
       len = (len << 8) | bytes[offset + 1 + i];

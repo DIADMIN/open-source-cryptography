@@ -51,12 +51,30 @@ export function inspectAPDU(apdu) {
 
   // 3. Prevent PIN verification bypass or eavesdropping
   if (ins === 0x20) {
-    // VERIFY PIN: Ensure PIN parameters are not being leaked or sent over unencrypted channels
-    // Typically, CCID PIN verification should be offloaded to PIN pad reader devices if available,
-    // otherwise verify length limits.
+    // VERIFY PIN: Ensure PIN parameters conform to standard values
+    if (p1 !== 0x00) {
+      throw new Error('APDU Policy Violation: Invalid VERIFY_PIN parameter P1 (must be 0x00).');
+    }
+    if (p2 > 0x8F) {
+      throw new Error('APDU Policy Violation: Invalid VERIFY_PIN parameter P2 (must be <= 0x8F).');
+    }
+    
     const lc = apdu[4] || 0;
-    if (lc > 16) {
-      throw new Error('APDU Policy Violation: PIN length exceeds maximum allowed limit.');
+    if (lc === 0 || lc > 16) {
+      throw new Error('APDU Policy Violation: PIN length must be between 1 and 16 bytes.');
+    }
+    
+    // Ensure packet length matches the declared Lc
+    if (apdu.length < 5 + lc) {
+      throw new Error('APDU Policy Violation: Truncated APDU packet relative to declared Lc length.');
+    }
+  }
+
+  // 4. Validate Lc data size matches overall packet length for all data-bearing commands
+  if (apdu.length > 4) {
+    const lc = apdu[4];
+    if (apdu.length > 5 && apdu.length < 5 + lc) {
+      throw new Error('APDU Policy Violation: Declared Lc length mismatch with actual packet buffer length.');
     }
   }
 
