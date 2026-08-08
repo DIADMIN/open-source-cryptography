@@ -5,9 +5,43 @@
 
 import { PDFDocument, PDFName, PDFRawStream } from 'pdf-lib';
 
+// Decompress zlib/deflate bytes using native DecompressionStream
+async function decompressFlate(bytes) {
+  const ds = new DecompressionStream('deflate');
+  const writer = ds.writable.getWriter();
+  writer.write(bytes);
+  writer.close();
+  const response = new Response(ds.readable);
+  const buffer = await response.arrayBuffer();
+  return new Uint8Array(buffer);
+}
+
+// Compress zlib/deflate bytes using native CompressionStream
+async function compressFlate(bytes) {
+  const cs = new CompressionStream('deflate');
+  const writer = cs.writable.getWriter();
+  writer.write(bytes);
+  writer.close();
+  const response = new Response(cs.readable);
+  const buffer = await response.arrayBuffer();
+  return new Uint8Array(buffer);
+}
+
+// Helper to determine if a stream is flate compressed
+function isFlateCompressed(stream) {
+  const filter = stream.dict.lookup(PDFName.of('Filter'));
+  if (!filter) return false;
+  if (filter === PDFName.of('FlateDecode')) return true;
+  if (typeof filter.asArray === 'function') {
+    return filter.asArray().includes(PDFName.of('FlateDecode'));
+  }
+  return false;
+}
+
 /**
  * Sanitizes a PDF document by stripping or replacing underlying text characters 
  * inside the PDF page content streams to prevent copy-paste and text extraction leaks.
+ * Supports both uncompressed and FlateDecode compressed streams.
  * 
  * @param {Uint8Array} pdfBytes - Original PDF bytes
  * @param {Array<string>} searchPhrases - Text strings to strip out
@@ -18,50 +52,56 @@ export async function sanitizePdfText(pdfBytes, searchPhrases = []) {
   const pages = pdfDoc.getPages();
 
   for (const page of pages) {
-    // 1. Get the page content stream(s)
     const contentsRef = page.node.get(PDFName.of('Contents'));
     if (!contentsRef) continue;
 
-    // Resolve contents streams (could be a single stream or an array of streams)
     const streams = page.node.lookup(PDFName.of('Contents'));
     const streamList = streams instanceof Array ? streams : [streams];
 
     for (const stream of streamList) {
       if (!(stream instanceof PDFRawStream)) continue;
 
-      // 2. Decode the raw PDF page content stream bytes to string
-      const rawBytes = stream.contents;
+      const isCompressed = isFlateCompressed(stream);
+      let rawBytes = stream.contents;
+      
+      if (isCompressed) {
+        try {
+          rawBytes = await decompressFlate(rawBytes);
+        } catch (err) {
+          throw new Error('Failed to decompress PDF page content stream: ' + err.message);
+        }
+      }
+
       const contentText = new TextDecoder('latin1').decode(rawBytes);
 
-      // 3. Process Tj and TJ operators to find and sanitize target phrases
+      // Process Tj and TJ operators to find and sanitize target phrases
       let sanitizedText = contentText;
       for (const phrase of searchPhrases) {
-        // Build regexes to capture parenthesized strings in Tj or TJ operators
-        // E.g. (sensitive data) Tj or [(sens) -10 (itive)] TJ
-        // Simple case: literal parenthesis substitution
         const literalRegex = new RegExp(`\\(([^)]*${phrase.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}[^)]*)\\)\\s*Tj`, 'gi');
-        
         sanitizedText = sanitizedText.replace(literalRegex, (match, textGroup) => {
-          // Replace sensitive characters with asterisks
           const masked = '*'.repeat(textGroup.length);
           return `(${masked}) Tj`;
         });
 
-        // Also clean up inside array TJ brackets
         const bracketRegex = new RegExp(`\\[([^\\]]*${phrase.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}[^\\]]*)\\]\\s*TJ`, 'gi');
         sanitizedText = sanitizedText.replace(bracketRegex, (match, arrayGroup) => {
-          // Mask parenthesized text blocks inside the array
           const maskedArray = arrayGroup.replace(/\(([^)]+)\)/g, (m, g) => `(${'*'.repeat(g.length)})`);
           return `[${maskedArray}] TJ`;
         });
       }
 
-      // 4. Update the content stream with the sanitized text
-      const newBytes = new TextEncoder().encode(sanitizedText);
+      let newBytes = new TextEncoder().encode(sanitizedText);
+      if (isCompressed) {
+        try {
+          newBytes = await compressFlate(newBytes);
+        } catch (err) {
+          throw new Error('Failed to compress sanitized PDF page content stream: ' + err.message);
+        }
+      }
+      
       stream.contents = newBytes;
     }
   }
 
-  // Save the sanitized document without object streams to ensure serialization is written
   return await pdfDoc.save({ useObjectStreams: false });
 }
