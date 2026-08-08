@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/esign-audit-verifier",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Offline PDF cryptographic signature validation and Section 65B Indian Evidence Act compliant audit log compiler",
   "main": "index.js",
   "type": "module",

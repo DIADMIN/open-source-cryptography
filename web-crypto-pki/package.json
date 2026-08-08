@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/web-crypto-pki",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Offline-first keypair and X.509 certificate generator using Web Crypto API",
   "main": "index.js",
   "type": "module",
