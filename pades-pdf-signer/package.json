@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/pades-pdf-signer",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "PAdES-compliant cryptographic PDF signer using incremental updates and client-side Web Crypto API",
   "main": "index.js",
   "type": "module",
