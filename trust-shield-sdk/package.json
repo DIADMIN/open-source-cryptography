@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/trust-shield-sdk",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Unified Developer SDK for DottedIce Cryptographic Trust Shield: sanitization, signing, and verification",
   "main": "index.js",
   "type": "module",

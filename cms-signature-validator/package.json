@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/cms-signature-validator",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Cryptographic PKCS#7 / CMS SignedData signature verifier and certificate chain parser",
   "main": "index.js",
   "type": "module",
