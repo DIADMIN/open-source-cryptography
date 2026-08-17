@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/pdf-redaction-engine",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Client-side PDF data redaction and secure verification prior to signing",
   "main": "index.js",
   "type": "module",
