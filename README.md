@@ -1,6 +1,6 @@
 ## Legal Terms & Disclaimer
 This open-source package is distributed strictly for technical education and architectural research purposes. 
-For full warranty disclaimers, export control notices (US EAR / EU Dual-Use), and limitation of liability terms, please review our [Open Source Terms & Disclaimer](https://dottedice.com/open-source-terms.html).
+For full warranty disclaimers, export control notices (US EAR / EU Dual-Use), and limitation of liability terms, please review our [Open Source Terms & Disclaimer](https://dottedice.com/legal.html#tab=opensource).
 ---
 
 
