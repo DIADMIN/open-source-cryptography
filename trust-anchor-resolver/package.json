@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/trust-anchor-resolver",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Certificate trust path builder and anchor resolver for AATL, eIDAS, and CCA India trust root structures",
   "main": "index.js",
   "type": "module",
@@ -13,7 +13,7 @@
   ],
   "author": "DottedIce Digital",
   "license": "Apache-2.0",
-  "homepage": "https://dottedice.com/open-source-terms.html",
+  "homepage": "https://dottedice.com/legal.html#tab=opensource",
   "publishConfig": {
     "access": "public"
   }

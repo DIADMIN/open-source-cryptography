@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/dsc-token-bridge",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "WebUSB and WebSerial bridge to read cryptographic USB tokens and smart cards in the browser",
   "main": "index.js",
   "type": "module",
@@ -14,7 +14,7 @@
   ],
   "author": "DottedIce Digital",
   "license": "Apache-2.0",
-  "homepage": "https://dottedice.com/open-source-terms.html",
+  "homepage": "https://dottedice.com/legal.html#tab=opensource",
   "publishConfig": {
     "access": "public"
   }
