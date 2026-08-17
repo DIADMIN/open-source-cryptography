@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/cms-signed-data",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Cryptographic Message Syntax (CMS) / PKCS#7 SignedData builder for client-side digital signatures",
   "main": "index.js",
   "type": "module",

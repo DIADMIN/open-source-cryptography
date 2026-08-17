@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/pdf-vector-sanitizer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Secure PDF text-stripping and data sanitization engine for compliance (GDPR/DPDP)",
   "main": "index.js",
   "type": "module",

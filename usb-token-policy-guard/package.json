@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/usb-token-policy-guard",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CCID security policy enforcer and APDU inspector for secure USB token communications",
   "main": "index.js",
   "type": "module",
