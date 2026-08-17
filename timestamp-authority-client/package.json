@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/timestamp-authority-client",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "RFC 3161 compliant Timestamping Authority (TSA) HTTP client for secure digital signature timestamps",
   "main": "index.js",
   "type": "module",
@@ -14,7 +14,7 @@
   ],
   "author": "DottedIce Digital",
   "license": "Apache-2.0",
-  "homepage": "https://dottedice.com/open-source-terms.html",
+  "homepage": "https://dottedice.com/legal.html#tab=opensource",
   "publishConfig": {
     "access": "public"
   }

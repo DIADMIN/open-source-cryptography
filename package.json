@@ -1,7 +1,7 @@
 {
   "name": "open-source-cryptography-monorepo",
   "private": true,
-  "homepage": "https://dottedice.com/open-source-terms.html",
+  "homepage": "https://dottedice.com/legal.html#tab=opensource",
   "scripts": {
     "test": "node test.js"
   },

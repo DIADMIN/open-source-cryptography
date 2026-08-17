@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/cms-signed-data",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Cryptographic Message Syntax (CMS) / PKCS#7 SignedData builder for client-side digital signatures",
   "main": "index.js",
   "type": "module",
@@ -16,7 +16,7 @@
   ],
   "author": "DottedIce Digital",
   "license": "Apache-2.0",
-  "homepage": "https://dottedice.com/open-source-terms.html",
+  "homepage": "https://dottedice.com/legal.html#tab=opensource",
   "publishConfig": {
     "access": "public"
   }
