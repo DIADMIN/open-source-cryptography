@@ -60,7 +60,7 @@ export function parseSequenceChildren(sequenceValueBytes) {
  * @returns {Promise<Object>} Verification status and extracted metadata
  */
 export async function verifyCMSSignature(cmsDer, docHash) {
-  const crypto = typeof window !== 'undefined' ? window.crypto : (await import('crypto')).webcrypto;
+  const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
 
   try {
     // 1. Outer ContentInfo SEQUENCE
