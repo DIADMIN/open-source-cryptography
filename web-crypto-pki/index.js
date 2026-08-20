@@ -78,7 +78,14 @@ export async function generateX509Certificate(subject, keyPair) {
   
   // 2. Generate a secure random serial number
   const randomBytes = new Uint8Array(8);
-  crypto.getRandomValues(randomBytes);
+  if (typeof crypto.getRandomValues === 'function') {
+    crypto.getRandomValues(randomBytes);
+  } else if (globalThis.crypto && typeof globalThis.crypto.getRandomValues === 'function') {
+    globalThis.crypto.getRandomValues(randomBytes);
+  } else {
+    const nodeCrypto = await import('node:crypto');
+    nodeCrypto.randomFillSync(randomBytes);
+  }
   const serialNumberHex = Array.from(randomBytes).map(b => b.toString(16).padStart(2, '0')).join('');
 
   const rsaSha256Oid = '1.2.840.113549.1.1.11'; // sha256WithRSAEncryption
