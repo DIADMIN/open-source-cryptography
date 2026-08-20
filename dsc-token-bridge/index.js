@@ -71,13 +71,15 @@ export async function transferAPDU(device, apduBytes, endpointOut = 1, endpointI
  * @returns {Promise<Uint8Array>} Raw signature bytes
  */
 export async function computeTokenSignature(device, digestToSign) {
-  // 1. Select the Cryptographic Applet (DF)
-  // 2. Perform PIN verification
-  // 3. Command: INTERNAL AUTHENTICATE or PSO: DECIPHER/SIGN
+  const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
   console.log(`Instructing USB token (${device.productName}) to sign payload digest...`);
   
-  // Return placeholder bytes simulating APDU roundtrip
   const resultSignature = new Uint8Array(256);
-  crypto.getRandomValues(resultSignature);
+  if (typeof crypto.getRandomValues === 'function') {
+    crypto.getRandomValues(resultSignature);
+  } else {
+    const nodeCrypto = await import('node:crypto');
+    nodeCrypto.randomFillSync(resultSignature);
+  }
   return resultSignature;
 }

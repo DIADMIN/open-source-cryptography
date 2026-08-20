@@ -24,6 +24,7 @@ function getDB() {
  * Derives a cryptographic key from a password.
  */
 async function deriveKey(password, salt, iterations = 100000) {
+  const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
   const enc = new TextEncoder();
   const passwordKey = await crypto.subtle.importKey(
     'raw',
