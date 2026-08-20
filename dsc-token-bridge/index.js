@@ -70,8 +70,15 @@ export async function transferAPDU(device, apduBytes, endpointOut = 1, endpointI
  * @param {Uint8Array} digestToSign - Target digest to sign
  * @returns {Promise<Uint8Array>} Raw signature bytes
  */
+async function getCrypto() {
+  if (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) return globalThis.crypto;
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) return window.crypto;
+  const nc = await import('node:crypto');
+  return nc.webcrypto || (nc.default && nc.default.webcrypto) || nc;
+}
+
 export async function computeTokenSignature(device, digestToSign) {
-  const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
+  const crypto = await getCrypto();
   console.log(`Instructing USB token (${device.productName}) to sign payload digest...`);
   
   const resultSignature = new Uint8Array(256);

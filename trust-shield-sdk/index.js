@@ -150,7 +150,14 @@ export class Verifier {
     const combined = new Uint8Array(part1.length + part2.length);
     combined.set(part1, 0);
     combined.set(part2, part1.length);
-    const cryptoObj = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
+async function getCrypto() {
+  if (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) return globalThis.crypto;
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) return window.crypto;
+  const nc = await import('node:crypto');
+  return nc.webcrypto || (nc.default && nc.default.webcrypto) || nc;
+}
+
+    const cryptoObj = await getCrypto();
     const docHashBytes = new Uint8Array(await cryptoObj.subtle.digest('SHA-256', combined));
 
     // C. Cryptographically verify CMS SignedAttributes RSASSA signature
