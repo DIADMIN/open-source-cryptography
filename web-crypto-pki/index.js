@@ -6,7 +6,7 @@ import { buildTBSCertificate, buildX509Certificate } from '@dottedice/x509-asn1-
  * @returns {Promise<CryptoKeyPair>} Key pair object
  */
 export async function generateKeyPair(type = 'RSA') {
-  const crypto = typeof window !== 'undefined' ? window.crypto : (await import('crypto')).webcrypto;
+  const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
   
   if (type === 'RSA') {
     return await crypto.subtle.generateKey(
@@ -40,7 +40,7 @@ export async function generateKeyPair(type = 'RSA') {
  * @returns {Promise<string>} PEM-formatted string
  */
 export async function exportPEM(key, format) {
-  const crypto = typeof window !== 'undefined' ? window.crypto : (await import('crypto')).webcrypto;
+  const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
   const isPrivate = format === 'private';
   const formatType = isPrivate ? 'pkcs8' : 'spki';
   
@@ -71,7 +71,7 @@ export async function exportPEM(key, format) {
  * @returns {Promise<Object>} Certificate PEM, DER bytes, and details
  */
 export async function generateX509Certificate(subject, keyPair) {
-  const crypto = typeof window !== 'undefined' ? window.crypto : (await import('crypto')).webcrypto;
+  const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
   
   // 1. Export the public key to SPKI DER format
   const publicKeySpkiBytes = new Uint8Array(await crypto.subtle.exportKey('spki', keyPair.publicKey));
