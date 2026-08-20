@@ -1,12 +1,19 @@
 import { buildTBSCertificate, buildX509Certificate } from '@dottedice/x509-asn1-builder';
 
+async function getCrypto() {
+  if (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) return globalThis.crypto;
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) return window.crypto;
+  const nc = await import('node:crypto');
+  return nc.webcrypto || (nc.default && nc.default.webcrypto) || nc;
+}
+
 /**
  * Generates an asymmetric key pair.
  * @param {string} type - Algorithm family, 'RSA' or 'ECDSA'
  * @returns {Promise<CryptoKeyPair>} Key pair object
  */
 export async function generateKeyPair(type = 'RSA') {
-  const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
+  const crypto = await getCrypto();
   
   if (type === 'RSA') {
     return await crypto.subtle.generateKey(
@@ -40,7 +47,7 @@ export async function generateKeyPair(type = 'RSA') {
  * @returns {Promise<string>} PEM-formatted string
  */
 export async function exportPEM(key, format) {
-  const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
+  const crypto = await getCrypto();
   const isPrivate = format === 'private';
   const formatType = isPrivate ? 'pkcs8' : 'spki';
   
@@ -71,7 +78,7 @@ export async function exportPEM(key, format) {
  * @returns {Promise<Object>} Certificate PEM, DER bytes, and details
  */
 export async function generateX509Certificate(subject, keyPair) {
-  const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
+  const crypto = await getCrypto();
   
   // 1. Export the public key to SPKI DER format
   const publicKeySpkiBytes = new Uint8Array(await crypto.subtle.exportKey('spki', keyPair.publicKey));

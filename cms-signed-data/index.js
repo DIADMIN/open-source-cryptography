@@ -89,10 +89,17 @@ export async function buildCMSSignedData(options) {
     messageDigestAttr
   ]));
 
+async function getCrypto() {
+  if (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) return globalThis.crypto;
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) return window.crypto;
+  const nc = await import('node:crypto');
+  return nc.webcrypto || (nc.default && nc.default.webcrypto) || nc;
+}
+
   // Standard-compliant signature calculation requires signing the SET representation (tag 0x31)
   let finalSignatureBytes = inputSignatureBytes || new Uint8Array(256);
   if (privateKey) {
-    const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
+    const crypto = await getCrypto();
     const signedAttrsData = derTLV(0x31, concatUint8Arrays([
       contentTypeAttr,
       messageDigestAttr
