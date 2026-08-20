@@ -6,9 +6,16 @@
 
 import { PDFDocument } from 'pdf-lib';
 
+async function getCrypto() {
+  if (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) return globalThis.crypto;
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) return window.crypto;
+  const nc = await import('node:crypto');
+  return nc.webcrypto || (nc.default && nc.default.webcrypto) || nc;
+}
+
 // Helper to compute SHA-256 digest of binary data
 async function getSHA256Hash(buffer) {
-  const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
+  const crypto = await getCrypto();
   const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
   return new Uint8Array(hashBuffer);
 }

@@ -20,11 +20,18 @@ function getDB() {
   });
 }
 
+async function getCrypto() {
+  if (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) return globalThis.crypto;
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) return window.crypto;
+  const nc = await import('node:crypto');
+  return nc.webcrypto || (nc.default && nc.default.webcrypto) || nc;
+}
+
 /**
  * Derives a cryptographic key from a password.
  */
 async function deriveKey(password, salt, iterations = 100000) {
-  const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
+  const crypto = await getCrypto();
   const enc = new TextEncoder();
   const passwordKey = await crypto.subtle.importKey(
     'raw',
