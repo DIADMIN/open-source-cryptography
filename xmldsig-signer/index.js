@@ -29,7 +29,7 @@ export async function signXML(xmlPayload, options = {}) {
     referenceUri = '' // Target XML ID (empty for enveloped signature)
   } = options;
 
-  const crypto = typeof window !== 'undefined' ? window.crypto : (await import('crypto')).webcrypto;
+  const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
   const canonicalPayload = canonicalizeXML(xmlPayload);
 
   // 1. Calculate digest value of canonical payload

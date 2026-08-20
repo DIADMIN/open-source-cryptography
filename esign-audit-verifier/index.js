@@ -8,7 +8,7 @@ import { PDFDocument } from 'pdf-lib';
 
 // Helper to compute SHA-256 digest of binary data
 async function getSHA256Hash(buffer) {
-  const crypto = typeof window !== 'undefined' ? window.crypto : (await import('crypto')).webcrypto;
+  const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
   const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
   return new Uint8Array(hashBuffer);
 }

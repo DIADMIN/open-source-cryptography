@@ -92,7 +92,7 @@ export async function buildCMSSignedData(options) {
   // Standard-compliant signature calculation requires signing the SET representation (tag 0x31)
   let finalSignatureBytes = inputSignatureBytes || new Uint8Array(256);
   if (privateKey) {
-    const crypto = typeof window !== 'undefined' ? window.crypto : (await import('crypto')).webcrypto;
+    const crypto = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : (typeof window !== 'undefined' ? window.crypto : (await import('node:crypto')).webcrypto);
     const signedAttrsData = derTLV(0x31, concatUint8Arrays([
       contentTypeAttr,
       messageDigestAttr
