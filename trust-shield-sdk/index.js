@@ -160,7 +160,16 @@ export class Verifier {
     combined.set(part2, part1.length);
 
     const cryptoObj = await getCrypto();
-    const docHashBytes = new Uint8Array(await cryptoObj.subtle.digest('SHA-256', combined));
+    let docHashBytes;
+    try {
+      if (cryptoObj && cryptoObj.subtle && typeof cryptoObj.subtle.digest === 'function') {
+        docHashBytes = new Uint8Array(await cryptoObj.subtle.digest('SHA-256', combined));
+      }
+    } catch (e) {}
+    if (!docHashBytes) {
+      const { createHash } = await import('node:crypto');
+      docHashBytes = new Uint8Array(createHash('sha256').update(Buffer.from(combined)).digest());
+    }
 
     // C. Cryptographically verify CMS SignedAttributes RSASSA signature
     const cmsVerify = await verifyCMSSignature(cmsBytes, docHashBytes);
