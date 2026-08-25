@@ -59,6 +59,7 @@ async function deriveKey(password, salt, iterations = 100000) {
  * Encrypts and stores a CryptoKey in IndexedDB.
  */
 export async function storeEncryptedKey(alias, cryptoKey, password) {
+  const crypto = await getCrypto();
   const format = cryptoKey.type === 'private' ? 'pkcs8' : 'spki';
   const exported = await crypto.subtle.exportKey(format, cryptoKey);
   
@@ -96,6 +97,7 @@ export async function storeEncryptedKey(alias, cryptoKey, password) {
  * Decrypts and retrieves a CryptoKey from IndexedDB.
  */
 export async function retrieveDecryptedKey(alias, password) {
+  const crypto = await getCrypto();
   const db = await getDB();
   const entry = await new Promise((resolve, reject) => {
     const tx = db.transaction('keys', 'readonly');

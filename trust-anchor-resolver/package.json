@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/trust-anchor-resolver",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Certificate trust path builder and anchor resolver for AATL, eIDAS, and CCA India trust root structures",
   "main": "index.js",
   "type": "module",
