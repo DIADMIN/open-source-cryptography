@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/timestamp-authority-client",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "RFC 3161 compliant Timestamping Authority (TSA) HTTP client for secure digital signature timestamps",
   "main": "index.js",
   "type": "module",

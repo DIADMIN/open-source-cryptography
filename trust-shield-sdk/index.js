@@ -14,6 +14,13 @@ import { buildName } from '@dottedice/x509-asn1-builder';
 import { getTimestampToken } from '@dottedice/timestamp-authority-client';
 import { storeEncryptedKey, retrieveDecryptedKey } from '@dottedice/secure-key-store';
 
+async function getCrypto() {
+  if (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) return globalThis.crypto;
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) return window.crypto;
+  const nc = await import('node:crypto');
+  return nc.webcrypto || (nc.default && nc.default.webcrypto) || nc;
+}
+
 /**
  * 1. Declarative Document processing pipeline helper
  */
@@ -133,13 +140,6 @@ export class Verifier {
       parseInt(byteRangeMatch[3], 10),
       parseInt(byteRangeMatch[4], 10)
     ];
-
-async function getCrypto() {
-  if (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) return globalThis.crypto;
-  if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) return window.crypto;
-  const nc = await import('node:crypto');
-  return nc.webcrypto || (nc.default && nc.default.webcrypto) || nc;
-}
 
     const hexStart = byteRange[0] + byteRange[1] + 1;
     const hexEnd = byteRange[2] - 1;

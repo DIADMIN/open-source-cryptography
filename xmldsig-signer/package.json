@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/xmldsig-signer",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Lightweight W3C XML Digital Signature (XMLDSig) payload builder for secure XML signing",
   "main": "index.js",
   "type": "module",

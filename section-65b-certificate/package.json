@@ -1,6 +1,6 @@
 {
   "name": "@dottedice/section-65b-certificate",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Indian Evidence Act Section 65B (Bharatiya Sakshya Adhiniyam 2023) court-admissible digital declaration generator",
   "main": "index.js",
   "type": "module",
